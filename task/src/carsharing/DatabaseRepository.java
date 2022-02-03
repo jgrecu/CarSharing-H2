@@ -19,7 +19,11 @@ public class DatabaseRepository {
     }
 
     public void createDatabase() {
-        String sCreateDb = "CREATE TABLE IF NOT EXISTS COMPANY(ID INTEGER PRIMARY KEY auto_increment,NAME VARCHAR(64))";
+        String sCreateDb = "CREATE TABLE IF NOT EXISTS COMPANY " +
+                "(ID INTEGER not NULL, " +
+                "NAME VARCHAR(64)" +
+                "PRIMARY KEY (ID)" +
+                ")";
         try (Connection conn = connect();
              Statement statement = conn.createStatement()) {
             statement.executeUpdate(sCreateDb);
@@ -29,7 +33,7 @@ public class DatabaseRepository {
     }
 
     public void insertCompany(String name) {
-        String sInsert = "INSERT INTO COMPANY(NAME) VALUES(?)";
+        String sInsert = "INSERT INTO COMPANY (NAME) VALUES (?)";
         try (Connection conn = connect();
              PreparedStatement preparedStatement = conn.prepareStatement(sInsert)) {
             preparedStatement.setString(1, name);
@@ -40,11 +44,12 @@ public class DatabaseRepository {
     }
 
     private Connection connect() {
+        final String DB_URL = "jdbc:h2:./src/carsharing/db/";
         Connection connection = null;
+
         try {
             Class.forName("org.h2.Driver");
-            String url = "jdbc:h2:./src/carsharing/db/";
-            connection = DriverManager.getConnection(url + databaseFileName);
+            connection = DriverManager.getConnection(DB_URL + databaseFileName);
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
