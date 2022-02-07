@@ -9,7 +9,7 @@ public class Main {
             dbName = args[1];
         }
 
-        CompanyService gui = new CompanyService(dbName);
+        CompanyController gui = new CompanyController(dbName);
         gui.run();
     }
 }

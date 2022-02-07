@@ -4,12 +4,13 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DatabaseRepository implements CompanyDao {
+public class DatabaseRepository {
     private final String databaseFileName;
     private static DatabaseRepository INSTANCE = null;
 
     private DatabaseRepository(String databaseFileName) {
         this.databaseFileName = databaseFileName;
+        createDatabase();
     }
 
     public static DatabaseRepository getInstance(String databaseFileName) {
@@ -20,7 +21,7 @@ public class DatabaseRepository implements CompanyDao {
         return INSTANCE;
     }
 
-    public void createDatabase() {
+    private void createDatabase() {
         String sCreateDb = "CREATE TABLE IF NOT EXISTS COMPANY " +
                 "(ID INTEGER AUTO_INCREMENT, " +
                 "NAME VARCHAR(64) UNIQUE NOT NULL," +
@@ -46,21 +47,6 @@ public class DatabaseRepository implements CompanyDao {
         }
     }
 
-    private Connection connect() {
-        final String DB_URL = "jdbc:h2:./src/carsharing/db/";
-        Connection connection = null;
-
-        try {
-            Class.forName("org.h2.Driver");
-//            connection = DriverManager.getConnection(DB_URL + databaseFileName, "sa", "");
-            connection = DriverManager.getConnection(DB_URL + databaseFileName);
-        } catch (SQLException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
-        return connection;
-    }
-
-    @Override
     public List<Company> getAllCompanies() {
         List<Company> companies = new ArrayList<>();
         String sqlQuery = "SELECT * FROM COMPANY";
@@ -79,6 +65,20 @@ public class DatabaseRepository implements CompanyDao {
         }
 
         return companies;
+    }
+
+    private Connection connect() {
+        final String DB_URL = "jdbc:h2:./src/carsharing/db/";
+        Connection connection = null;
+
+        try {
+            Class.forName("org.h2.Driver");
+//            connection = DriverManager.getConnection(DB_URL + databaseFileName, "sa", "");
+            connection = DriverManager.getConnection(DB_URL + databaseFileName);
+        } catch (SQLException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return connection;
     }
 
 }
