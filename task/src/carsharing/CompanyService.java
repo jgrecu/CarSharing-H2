@@ -3,11 +3,11 @@ package carsharing;
 import java.util.List;
 import java.util.Scanner;
 
-public class UI {
+public class CompanyService {
     private final Scanner scanner;
     private final DatabaseRepository db;
 
-    public UI(String dbName) {
+    public CompanyService(String dbName) {
         this.scanner = new Scanner(System.in);
         this.db = DatabaseRepository.getInstance(dbName);
         this.db.createDatabase();
