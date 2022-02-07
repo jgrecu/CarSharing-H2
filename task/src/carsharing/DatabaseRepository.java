@@ -1,8 +1,10 @@
 package carsharing;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
-public class DatabaseRepository {
+public class DatabaseRepository implements CompanyDao {
     private final String databaseFileName;
     private static DatabaseRepository INSTANCE = null;
 
@@ -20,8 +22,8 @@ public class DatabaseRepository {
 
     public void createDatabase() {
         String sCreateDb = "CREATE TABLE IF NOT EXISTS COMPANY " +
-                "(ID INTEGER not NULL, " +
-                "NAME VARCHAR(64)" +
+                "(ID INTEGER AUTO_INCREMENT, " +
+                "NAME VARCHAR(64) UNIQUE NOT NULL," +
                 "PRIMARY KEY (ID)" +
                 ")";
         try (Connection conn = connect();
@@ -38,6 +40,7 @@ public class DatabaseRepository {
              PreparedStatement preparedStatement = conn.prepareStatement(sInsert)) {
             preparedStatement.setString(1, name);
             preparedStatement.executeUpdate();
+            System.out.println("The company was created!");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -49,10 +52,33 @@ public class DatabaseRepository {
 
         try {
             Class.forName("org.h2.Driver");
+//            connection = DriverManager.getConnection(DB_URL + databaseFileName, "sa", "");
             connection = DriverManager.getConnection(DB_URL + databaseFileName);
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return connection;
     }
+
+    @Override
+    public List<Company> getAllCompanies() {
+        List<Company> companies = new ArrayList<>();
+        String sqlQuery = "SELECT * FROM COMPANY";
+
+        try (Connection conn = connect();
+             Statement statement = conn.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(sqlQuery);
+            while (resultSet.next()) {
+                Company company = new Company();
+                company.setID(resultSet.getInt("ID"));
+                company.setName(resultSet.getString("NAME"));
+                companies.add(company);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return companies;
+    }
+
 }
