@@ -22,14 +22,24 @@ public class DatabaseRepository {
     }
 
     private void createDatabase() {
-        String sCreateDb = "CREATE TABLE IF NOT EXISTS COMPANY " +
+        String sCreateCompanyTable = "CREATE TABLE IF NOT EXISTS COMPANY " +
                 "(ID INTEGER AUTO_INCREMENT, " +
-                "NAME VARCHAR(64) UNIQUE NOT NULL," +
+                "NAME VARCHAR(100) UNIQUE NOT NULL," +
                 "PRIMARY KEY (ID)" +
+                ")";
+        String sCreateCarTable = "CREATE TABLE IF NOT EXISTS CAR" +
+                "(ID INTEGER AUTO_INCREMENT, " +
+                "NAME VARCHAR(100) UNIQUE NOT NULL, " +
+                "COMPANY_ID INTEGER NOT NULL, " +
+                "PRIMARY KEY (ID), " +
+                "CONSTRAINT fk_company_id " +
+                "FOREIGN KEY (COMPANY_ID) " +
+                "REFERENCES COMPANY(ID)" +
                 ")";
         try (Connection conn = connect();
              Statement statement = conn.createStatement()) {
-            statement.executeUpdate(sCreateDb);
+            statement.executeUpdate(sCreateCompanyTable);
+            statement.executeUpdate(sCreateCarTable);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -37,8 +47,17 @@ public class DatabaseRepository {
 
     public void insertCompany(String name) {
         String sInsert = "INSERT INTO COMPANY (NAME) VALUES (?)";
+        String sqlQuery = "SELECT * FROM COMPANY";
+        String resetId = "ALTER TABLE COMPANY ALTER COLUMN ID RESTART WITH 1";
+
         try (Connection conn = connect();
-             PreparedStatement preparedStatement = conn.prepareStatement(sInsert)) {
+             PreparedStatement preparedStatement = conn.prepareStatement(sInsert);
+             Statement statement = conn.createStatement();
+             ResultSet resultSet = statement.executeQuery(sqlQuery)) {
+
+            if (!resultSet.next()) {
+                statement.executeUpdate(resetId);
+            }
             preparedStatement.setString(1, name);
             preparedStatement.executeUpdate();
             System.out.println("The company was created!");
@@ -65,6 +84,39 @@ public class DatabaseRepository {
         }
 
         return companies;
+    }
+
+    public List<Car> getAllCompanyCars(int carId) {
+        List<Car> companyCars = new ArrayList<>();
+        String sqlQuery = "Select * FROM CAR WHERE COMPANY_ID = ";
+
+        try (Connection conn = connect();
+             Statement statement = conn.createStatement()) {
+            ResultSet resultSet = statement.executeQuery(sqlQuery + carId);
+            while (resultSet.next()) {
+                Car car = new Car();
+                car.setID(resultSet.getInt("ID"));
+                car.setName(resultSet.getString("NAME"));
+                car.setCompanyId(resultSet.getInt("COMPANY_ID"));
+                companyCars.add(car);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return companyCars;
+    }
+
+    public void insertCar(String name, int companyId) {
+        String sInsert = "INSERT INTO CAR (NAME, COMPANY_ID) VALUES (?, ?)";
+        try (Connection conn = connect();
+             PreparedStatement preparedStatement = conn.prepareStatement(sInsert)) {
+            preparedStatement.setString(1, name);
+            preparedStatement.setInt(2, companyId);
+            preparedStatement.executeUpdate();
+            System.out.println("The car was added!\n");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private Connection connect() {

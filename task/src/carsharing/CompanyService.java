@@ -18,4 +18,14 @@ public class CompanyService implements CompanyDao {
     public void addCompany(String name) {
         db.insertCompany(name);
     }
+
+    @Override
+    public List<Car> getAllCompanyCars(int carId) {
+        return db.getAllCompanyCars(carId);
+    }
+
+    @Override
+    public void addCar(String name, int companyId) {
+        db.insertCar(name, companyId);
+    }
 }

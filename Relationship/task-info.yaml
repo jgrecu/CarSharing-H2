@@ -555,6 +555,267 @@ files:
         }
     }
   learner_created: false
+- name: src/carsharing/Company.java
+  visible: true
+  text: |
+    package carsharing;
+
+    public class Company {
+        private int ID;
+        private String name;
+
+        public Company() {
+        }
+        public Company(int id, String name) {
+            ID = id;
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setID(int ID) {
+            this.ID = ID;
+        }
+
+        public int getID() {
+            return ID;
+        }
+
+        @Override
+        public String toString() {
+            return "Company{" +
+                    "ID=" + ID +
+                    ", name='" + name + '\'' +
+                    '}';
+        }
+    }
+  learner_created: true
+- name: src/carsharing/CompanyController.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.util.List;
+    import java.util.Scanner;
+
+    public class CompanyController {
+        private final Scanner scanner;
+        private final CompanyService dbService;
+
+        public CompanyController(String dbName) {
+            this.scanner = new Scanner(System.in);
+            this.dbService = new CompanyService(dbName);
+        }
+
+        public void run() {
+            while (true) {
+                printLoginMenu();
+                String option = scanner.nextLine();
+                switch (option) {
+                    case "1":
+                        mainMenu();
+                        break;
+                    case "0":
+                        scanner.close();
+                        return;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void mainMenu() {
+            while (true) {
+                printMainMenu();
+                String choice = scanner.nextLine();
+
+                switch (choice) {
+                    case "1":
+                        companyList();
+                        break;
+                    case "2":
+                        createCompany();
+                        break;
+                    case "0":
+                        return;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void companyList() {
+            List<Company> companies = dbService.getAllCompanies();
+            if (companies.isEmpty()) {
+                System.out.println("\nThe company list is empty!");
+            } else {
+                System.out.println("\nCompany list:");
+                companies.forEach(company -> System.out.printf("%d. %s%n", company.getID(), company.getName()));
+            }
+        }
+
+        private void createCompany() {
+            System.out.println("\nEnter the company name:");
+            String companyName = scanner.nextLine();
+            dbService.addCompany(companyName);
+        }
+
+
+        private void printLoginMenu() {
+            System.out.println("1. Log in as a manager\n" +
+                    "0. Exit");
+        }
+
+        private void printMainMenu() {
+            System.out.println("\n1. Company list\n" +
+                    "2. Create a company\n" +
+                    "0. Back");
+        }
+    }
+  learner_created: true
+- name: src/carsharing/DatabaseRepository.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.sql.*;
+    import java.util.ArrayList;
+    import java.util.List;
+
+    public class DatabaseRepository {
+        private final String databaseFileName;
+        private static DatabaseRepository INSTANCE = null;
+
+        private DatabaseRepository(String databaseFileName) {
+            this.databaseFileName = databaseFileName;
+            createDatabase();
+        }
+
+        public static DatabaseRepository getInstance(String databaseFileName) {
+            if (INSTANCE == null) {
+                INSTANCE = new DatabaseRepository(databaseFileName);
+                return INSTANCE;
+            }
+            return INSTANCE;
+        }
+
+        private void createDatabase() {
+            String sCreateDb = "CREATE TABLE IF NOT EXISTS COMPANY " +
+                    "(ID INTEGER AUTO_INCREMENT, " +
+                    "NAME VARCHAR(64) UNIQUE NOT NULL," +
+                    "PRIMARY KEY (ID)" +
+                    ")";
+            try (Connection conn = connect();
+                 Statement statement = conn.createStatement()) {
+                statement.executeUpdate(sCreateDb);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void insertCompany(String name) {
+            String sInsert = "INSERT INTO COMPANY (NAME) VALUES (?)";
+            try (Connection conn = connect();
+                 PreparedStatement preparedStatement = conn.prepareStatement(sInsert)) {
+                preparedStatement.setString(1, name);
+                preparedStatement.executeUpdate();
+                System.out.println("The company was created!");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public List<Company> getAllCompanies() {
+            List<Company> companies = new ArrayList<>();
+            String sqlQuery = "SELECT * FROM COMPANY";
+
+            try (Connection conn = connect();
+                 Statement statement = conn.createStatement()) {
+                ResultSet resultSet = statement.executeQuery(sqlQuery);
+                while (resultSet.next()) {
+                    Company company = new Company();
+                    company.setID(resultSet.getInt("ID"));
+                    company.setName(resultSet.getString("NAME"));
+                    companies.add(company);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return companies;
+        }
+
+        private Connection connect() {
+            final String DB_URL = "jdbc:h2:./src/carsharing/db/";
+            Connection connection = null;
+
+            try {
+                Class.forName("org.h2.Driver");
+    //            connection = DriverManager.getConnection(DB_URL + databaseFileName, "sa", "");
+                connection = DriverManager.getConnection(DB_URL + databaseFileName);
+            } catch (SQLException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            return connection;
+        }
+
+    }
+  learner_created: true
+- name: src/carsharing/CompanyService.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.util.List;
+
+    public class CompanyService implements CompanyDao {
+        private final DatabaseRepository db;
+
+        public CompanyService(String dbName) {
+            this.db = DatabaseRepository.getInstance(dbName);
+        }
+
+        @Override
+        public List<Company> getAllCompanies() {
+            return db.getAllCompanies();
+        }
+
+        @Override
+        public void addCompany(String name) {
+            db.insertCompany(name);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/CompanyDao.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.util.List;
+
+    public interface CompanyDao {
+        public List<Company> getAllCompanies();
+        public void addCompany(String name);
+    //    public Company getCompanyById(int id);
+    //    public void updateCompany(Company company);
+    //    public void deleteCompany(Company company);
+    }
+  learner_created: true
+- name: src/carsharing/Car.java
+  visible: true
+  learner_created: true
+- name: src/carsharing/db/carsharing.mv.db
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/11503#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Tue, 08 Feb 2022 15:04:53 UTC
 record: -1

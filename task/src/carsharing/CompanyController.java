@@ -1,6 +1,7 @@
 package carsharing;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class CompanyController {
@@ -54,8 +55,52 @@ public class CompanyController {
         if (companies.isEmpty()) {
             System.out.println("\nThe company list is empty!");
         } else {
-            System.out.println("\nCompany list:");
+            System.out.println("\nChoose a company:");
             companies.forEach(company -> System.out.printf("%d. %s%n", company.getID(), company.getName()));
+            System.out.println("0. Back");
+
+            String option = scanner.nextLine();
+
+            Optional<Company> companyOptional = companies.stream()
+                    .filter(company -> Integer.toString(company.getID()).equals(option))
+                    .findAny();
+            companyOptional.ifPresent(this::companyMenu);
+        }
+    }
+
+    private void companyMenu(Company company) {
+        System.out.println("\n'" + company.getName() + "' company:");
+        while (true) {
+            System.out.println("1. Car list\n" +
+                    "2. Create a car\n" +
+                    "0. Back");
+            String option = scanner.nextLine();
+            switch (option) {
+                case "0":
+                    return;
+                case "1":
+                    carList(company);
+                    break;
+                case "2":
+                    addCar(company.getID());
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void carList(Company company) {
+        List<Car> cars = dbService.getAllCompanyCars(company.getID());
+        if (cars.isEmpty()) {
+            System.out.println("\nThe car list is empty!\n");
+        } else {
+            int carId = 1;
+            System.out.println("\n'" + company.getName() + "' cars:");
+            for (Car car : cars) {
+                System.out.printf("%d. %s%n", carId++, car.getName());
+            }
+            System.out.println();
         }
     }
 
@@ -65,6 +110,11 @@ public class CompanyController {
         dbService.addCompany(companyName);
     }
 
+    private void addCar(int company_id) {
+        System.out.println("\nEnter the car name:");
+        String carName = scanner.nextLine();
+        dbService.addCar(carName, company_id);
+    }
 
     private void printLoginMenu() {
         System.out.println("1. Log in as a manager\n" +
@@ -76,4 +126,5 @@ public class CompanyController {
                 "2. Create a company\n" +
                 "0. Back");
     }
+
 }
