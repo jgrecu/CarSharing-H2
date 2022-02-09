@@ -3,9 +3,9 @@ package carsharing;
 public class Main {
 
     public static void main(String[] args) {
-        String dbName = "carsharing.db";
+        String dbName = "carsharing";
 
-        if (args.length > 0 && args[0].equals("-databaseFileName")) {
+        if (args.length > 1 && args[0].equals("-databaseFileName")) {
             dbName = args[1];
         }
 

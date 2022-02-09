@@ -1,11 +1,11 @@
 package carsharing;
 
-public class Car {
-    private int ID;
+public class Customer {
+    private Integer ID;
     private String name;
-    private int companyId;
+    private Integer rentedCarId;
 
-    public Car() {
+    public Customer() {
     }
 
     public int getID() {
@@ -24,12 +24,12 @@ public class Car {
         this.name = name;
     }
 
-    public int getCompanyId() {
-        return companyId;
+    public Integer getRentedCarId() {
+        return rentedCarId;
     }
 
-    public void setCompanyId(int companyId) {
-        this.companyId = companyId;
+    public void setRentedCarId(Integer rentedCarId) {
+        this.rentedCarId = rentedCarId;
     }
 
     @Override

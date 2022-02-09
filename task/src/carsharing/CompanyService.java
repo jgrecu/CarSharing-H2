@@ -20,12 +20,42 @@ public class CompanyService implements CompanyDao {
     }
 
     @Override
-    public List<Car> getAllCompanyCars(int carId) {
-        return db.getAllCompanyCars(carId);
+    public List<Car> getAllCompanyCars(int companyId) {
+        return db.getAllCompanyCars(companyId);
     }
 
     @Override
     public void addCar(String name, int companyId) {
         db.insertCar(name, companyId);
+    }
+
+    @Override
+    public List<Customer> getAllCustomers() {
+        return db.getAllCustomers();
+    }
+
+    @Override
+    public void addCustomer(String name) {
+        db.insertCustomer(name);
+    }
+
+    @Override
+    public void getRentedCar(Integer customerId) {
+        db.getRentedCarByCustomerId(customerId);
+    }
+
+    @Override
+    public void rentACar(Integer customerId, Integer carId) {
+        db.rentACar(customerId, carId);
+    }
+
+    @Override
+    public List<Car> getAllCompanyAvailableCars(int companyId) {
+        return db.getAllCompanyAvailableCars(companyId);
+    }
+
+    @Override
+    public void returnCar(Integer customerId) {
+        db.returnRentedCar(customerId);
     }
 }

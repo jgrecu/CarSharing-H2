@@ -6,10 +6,6 @@ public class Company {
 
     public Company() {
     }
-    public Company(int id, String name) {
-        ID = id;
-        this.name = name;
-    }
 
     public String getName() {
         return name;
@@ -29,9 +25,6 @@ public class Company {
 
     @Override
     public String toString() {
-        return "Company{" +
-                "ID=" + ID +
-                ", name='" + name + '\'' +
-                '}';
+        return this.getID() + ". " + this.getName();
     }
 }

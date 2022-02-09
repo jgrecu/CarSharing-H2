@@ -862,6 +862,481 @@ files:
         }
     }
   learner_created: false
+- name: src/carsharing/Car.java
+  visible: true
+  text: |
+    package carsharing;
+
+    public class Car {
+        private int ID;
+        private String name;
+        private int companyId;
+
+        public Car() {
+        }
+
+        public int getID() {
+            return ID;
+        }
+
+        public void setID(int ID) {
+            this.ID = ID;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getCompanyId() {
+            return companyId;
+        }
+
+        public void setCompanyId(int companyId) {
+            this.companyId = companyId;
+        }
+
+        @Override
+        public String toString() {
+            return "Car{" +
+                    "ID=" + ID +
+                    ", name='" + name + '\'' +
+                    ", companyId=" + companyId +
+                    '}';
+        }
+    }
+  learner_created: true
+- name: src/carsharing/Company.java
+  visible: true
+  text: |
+    package carsharing;
+
+    public class Company {
+        private int ID;
+        private String name;
+
+        public Company() {
+        }
+        public Company(int id, String name) {
+            ID = id;
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setID(int ID) {
+            this.ID = ID;
+        }
+
+        public int getID() {
+            return ID;
+        }
+
+        @Override
+        public String toString() {
+            return "Company{" +
+                    "ID=" + ID +
+                    ", name='" + name + '\'' +
+                    '}';
+        }
+    }
+  learner_created: true
+- name: src/carsharing/CompanyController.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.util.List;
+    import java.util.Optional;
+    import java.util.Scanner;
+
+    public class CompanyController {
+        private final Scanner scanner;
+        private final CompanyService dbService;
+
+        public CompanyController(String dbName) {
+            this.scanner = new Scanner(System.in);
+            this.dbService = new CompanyService(dbName);
+        }
+
+        public void run() {
+            while (true) {
+                printLoginMenu();
+                String option = scanner.nextLine();
+                switch (option) {
+                    case "1":
+                        mainMenu();
+                        break;
+                    case "0":
+                        scanner.close();
+                        return;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void mainMenu() {
+            while (true) {
+                printMainMenu();
+                String choice = scanner.nextLine();
+
+                switch (choice) {
+                    case "1":
+                        companyList();
+                        break;
+                    case "2":
+                        createCompany();
+                        break;
+                    case "0":
+                        return;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void companyList() {
+            List<Company> companies = dbService.getAllCompanies();
+            if (companies.isEmpty()) {
+                System.out.println("\nThe company list is empty!");
+            } else {
+                System.out.println("\nChoose a company:");
+                companies.forEach(company -> System.out.printf("%d. %s%n", company.getID(), company.getName()));
+                System.out.println("0. Back");
+
+                String option = scanner.nextLine();
+
+                Optional<Company> companyOptional = companies.stream()
+                        .filter(company -> Integer.toString(company.getID()).equals(option))
+                        .findAny();
+                companyOptional.ifPresent(this::companyMenu);
+            }
+        }
+
+        private void companyMenu(Company company) {
+            System.out.println("\n'" + company.getName() + "' company:");
+            while (true) {
+                System.out.println("1. Car list\n" +
+                        "2. Create a car\n" +
+                        "0. Back");
+                String option = scanner.nextLine();
+                switch (option) {
+                    case "0":
+                        return;
+                    case "1":
+                        carList(company);
+                        break;
+                    case "2":
+                        addCar(company.getID());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        private void carList(Company company) {
+            List<Car> cars = dbService.getAllCompanyCars(company.getID());
+            if (cars.isEmpty()) {
+                System.out.println("\nThe car list is empty!\n");
+            } else {
+                int carId = 1;
+                System.out.println("\n'" + company.getName() + "' cars:");
+                for (Car car : cars) {
+                    System.out.printf("%d. %s%n", carId++, car.getName());
+                }
+                System.out.println();
+            }
+        }
+
+        private void createCompany() {
+            System.out.println("\nEnter the company name:");
+            String companyName = scanner.nextLine();
+            dbService.addCompany(companyName);
+        }
+
+        private void addCar(int company_id) {
+            System.out.println("\nEnter the car name:");
+            String carName = scanner.nextLine();
+            dbService.addCar(carName, company_id);
+        }
+
+        private void printLoginMenu() {
+            System.out.println("1. Log in as a manager\n" +
+                    "0. Exit");
+        }
+
+        private void printMainMenu() {
+            System.out.println("\n1. Company list\n" +
+                    "2. Create a company\n" +
+                    "0. Back");
+        }
+
+    }
+  learner_created: true
+- name: src/carsharing/Customer.java
+  visible: true
+  text: |
+    package carsharing;
+
+    public class Customer {
+        private int ID;
+        private String name;
+        private int rentedCarId;
+
+        public Customer() {
+        }
+
+        public int getID() {
+            return ID;
+        }
+
+        public void setID(int ID) {
+            this.ID = ID;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getRentedCarId() {
+            return rentedCarId;
+        }
+
+        public void setRentedCarId(int rentedCarId) {
+            this.rentedCarId = rentedCarId;
+        }
+
+        @Override
+        public String toString() {
+            return "Customer{" +
+                    "ID=" + ID +
+                    ", name='" + name + '\'' +
+                    ", rentedCarId=" + rentedCarId +
+                    '}';
+        }
+    }
+  learner_created: true
+- name: src/carsharing/DatabaseRepository.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.sql.*;
+    import java.util.ArrayList;
+    import java.util.List;
+
+    public class DatabaseRepository {
+        private final String databaseFileName;
+        private static DatabaseRepository INSTANCE = null;
+
+        private DatabaseRepository(String databaseFileName) {
+            this.databaseFileName = databaseFileName;
+            createDatabase();
+        }
+
+        public static DatabaseRepository getInstance(String databaseFileName) {
+            if (INSTANCE == null) {
+                INSTANCE = new DatabaseRepository(databaseFileName);
+                return INSTANCE;
+            }
+            return INSTANCE;
+        }
+
+        private void createDatabase() {
+            String sCreateCompanyTable = "CREATE TABLE IF NOT EXISTS COMPANY " +
+                    "(ID INTEGER AUTO_INCREMENT, " +
+                    "NAME VARCHAR(100) UNIQUE NOT NULL," +
+                    "PRIMARY KEY (ID)" +
+                    ")";
+            String sCreateCarTable = "CREATE TABLE IF NOT EXISTS CAR" +
+                    "(ID INTEGER AUTO_INCREMENT, " +
+                    "NAME VARCHAR(100) UNIQUE NOT NULL, " +
+                    "COMPANY_ID INTEGER NOT NULL, " +
+                    "PRIMARY KEY (ID), " +
+                    "CONSTRAINT fk_company_id " +
+                    "FOREIGN KEY (COMPANY_ID) " +
+                    "REFERENCES COMPANY(ID)" +
+                    ")";
+            String sCreateCustomerTable = "CREATE TABLE IF NOT EXISTS CUSTOMER" +
+                    "(ID INTEGER AUTO_INCREMENT, " +
+                    "NAME VARCHAR(100) UNIQUE NOT NULL, " +
+                    "RENTED_CAR_ID INTEGER, " +
+                    "PRIMARY KEY (ID), " +
+                    "CONSTRAINT fk_rented_car_id " +
+                    "FOREIGN KEY (RENTED_CAR_ID) " +
+                    "REFERENCES CAR(ID)" +
+                    ")";
+            try (Connection conn = connect();
+                 Statement statement = conn.createStatement()) {
+                statement.executeUpdate(sCreateCompanyTable);
+                statement.executeUpdate(sCreateCarTable);
+                statement.executeUpdate(sCreateCustomerTable);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public void insertCompany(String name) {
+            String sInsert = "INSERT INTO COMPANY (NAME) VALUES (?)";
+            String sqlQuery = "SELECT * FROM COMPANY";
+            String resetId = "ALTER TABLE COMPANY ALTER COLUMN ID RESTART WITH 1";
+
+            try (Connection conn = connect();
+                 PreparedStatement preparedStatement = conn.prepareStatement(sInsert);
+                 Statement statement = conn.createStatement();
+                 ResultSet resultSet = statement.executeQuery(sqlQuery)) {
+
+                if (!resultSet.next()) {
+                    statement.executeUpdate(resetId);
+                }
+                preparedStatement.setString(1, name);
+                preparedStatement.executeUpdate();
+                System.out.println("The company was created!");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public List<Company> getAllCompanies() {
+            List<Company> companies = new ArrayList<>();
+            String sqlQuery = "SELECT * FROM COMPANY";
+
+            try (Connection conn = connect();
+                 Statement statement = conn.createStatement()) {
+                ResultSet resultSet = statement.executeQuery(sqlQuery);
+                while (resultSet.next()) {
+                    Company company = new Company();
+                    company.setID(resultSet.getInt("ID"));
+                    company.setName(resultSet.getString("NAME"));
+                    companies.add(company);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            return companies;
+        }
+
+        public List<Car> getAllCompanyCars(int carId) {
+            List<Car> companyCars = new ArrayList<>();
+            String sqlQuery = "Select * FROM CAR WHERE COMPANY_ID = ";
+
+            try (Connection conn = connect();
+                 Statement statement = conn.createStatement()) {
+                ResultSet resultSet = statement.executeQuery(sqlQuery + carId);
+                while (resultSet.next()) {
+                    Car car = new Car();
+                    car.setID(resultSet.getInt("ID"));
+                    car.setName(resultSet.getString("NAME"));
+                    car.setCompanyId(resultSet.getInt("COMPANY_ID"));
+                    companyCars.add(car);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            return companyCars;
+        }
+
+        public void insertCar(String name, int companyId) {
+            String sInsert = "INSERT INTO CAR (NAME, COMPANY_ID) VALUES (?, ?)";
+            try (Connection conn = connect();
+                 PreparedStatement preparedStatement = conn.prepareStatement(sInsert)) {
+                preparedStatement.setString(1, name);
+                preparedStatement.setInt(2, companyId);
+                preparedStatement.executeUpdate();
+                System.out.println("The car was added!\n");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private Connection connect() {
+            final String DB_URL = "jdbc:h2:./src/carsharing/db/";
+            Connection connection = null;
+
+            try {
+                Class.forName("org.h2.Driver");
+    //            connection = DriverManager.getConnection(DB_URL + databaseFileName, "sa", "");
+                connection = DriverManager.getConnection(DB_URL + databaseFileName);
+            } catch (SQLException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+            return connection;
+        }
+
+    }
+  learner_created: true
+- name: src/carsharing/CompanyService.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.util.List;
+
+    public class CompanyService implements CompanyDao {
+        private final DatabaseRepository db;
+
+        public CompanyService(String dbName) {
+            this.db = DatabaseRepository.getInstance(dbName);
+        }
+
+        @Override
+        public List<Company> getAllCompanies() {
+            return db.getAllCompanies();
+        }
+
+        @Override
+        public void addCompany(String name) {
+            db.insertCompany(name);
+        }
+
+        @Override
+        public List<Car> getAllCompanyCars(int carId) {
+            return db.getAllCompanyCars(carId);
+        }
+
+        @Override
+        public void addCar(String name, int companyId) {
+            db.insertCar(name, companyId);
+        }
+    }
+  learner_created: true
+- name: src/carsharing/CompanyDao.java
+  visible: true
+  text: |
+    package carsharing;
+
+    import java.util.List;
+
+    public interface CompanyDao {
+        public List<Company> getAllCompanies();
+        public void addCompany(String name);
+        public List<Car> getAllCompanyCars(int carId);
+        public void addCar(String name, int companyId);
+    }
+  learner_created: true
+- name: src/carsharing/db/carsharing.mv.db
+  visible: true
+  learner_created: true
 feedback_link: https://hyperskill.org/learn/step/11504#comment
-status: Unchecked
+status: Solved
+feedback:
+  message: Well done! You've finished the project. Select a new project on <a href="https://hyperskill.org/projects">JetBrains
+    Academy</a> to continue learning.
+  time: Wed, 09 Feb 2022 11:28:55 UTC
 record: -1
