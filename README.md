@@ -9,7 +9,7 @@ During the project implementation, I learnt the basics of SQL and work with the 
 
 Examples
 The greater-than symbol followed by a space > represents the user input. Note that it's not part of the input.
-`code`
+```
 1. Log in as a manager
 2. Log in as a customer
 3. Create a customer
@@ -147,3 +147,4 @@ You've returned a rented car!
 3. Create a customer
 0. Exit
 > 0
+```
